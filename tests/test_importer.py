@@ -10,6 +10,7 @@ from photo_importer.importer import PhotoImporter, ImportStats, ImportConfig
 from PIL import Image
 from PIL.ExifTags import TAGS
 import piexif
+import pytest
 
 class TestPhotoImporter(unittest.TestCase):
     def setUp(self):
@@ -265,6 +266,21 @@ class TestPhotoImporter(unittest.TestCase):
         valid, config = self.importer.validate_arguments(args)
         self.assertFalse(valid)
         self.assertIsNone(config)
+
+@pytest.mark.usefixtures("tmp_path", "capsys")
+def test_get_date_taken_raf_file_no_unwanted_output(tmp_path, capsys):
+    """Test that RAF file processing doesn't print 'File format not recognized'."""
+    # Create a mock RAF file
+    raf_file = tmp_path / "test.RAF"
+    raf_file.write_bytes(b"Mock RAF file content")
+    
+    importer = PhotoImporter()
+    importer.get_date_taken(str(raf_file))
+    
+    # Check captured output
+    captured = capsys.readouterr()
+    assert "File format not recognized" not in captured.out
+    assert "File format not recognized" not in captured.err
 
 if __name__ == '__main__':
     unittest.main()

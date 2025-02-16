@@ -31,6 +31,10 @@ class PhotoImporter:
 
     def extract_date_with_exifread(self, file_path: str) -> Optional[datetime.datetime]:
         """Extract date from image file using exifread library."""
+        # Skip RAF files to avoid unwanted output
+        if os.path.splitext(file_path)[1].lower() == '.raf':
+            return None
+            
         try:
             with open(file_path, 'rb') as f:
                 tags = exifread.process_file(f, details=False)
@@ -58,11 +62,16 @@ class PhotoImporter:
     def get_date_taken(self, file_path: str) -> Optional[datetime.datetime]:
         """
         Extract the date taken from an image file.
-        First attempts to use exifread, then falls back to exiftool for RAF files.
+        Uses exiftool for RAF files and exifread for other formats.
         """
+        ext = os.path.splitext(file_path)[1].lower()
+        
+        # Use exiftool directly for RAF files
+        if ext == '.raf':
+            return self.extract_date_with_exiftool(file_path)
+            
+        # Use exifread for other formats
         date = self.extract_date_with_exifread(file_path)
-        if date is None and os.path.splitext(file_path)[1].lower() == '.raf':
-            date = self.extract_date_with_exiftool(file_path)
         return date
 
     def create_destination_directory(self, path: str) -> bool:
