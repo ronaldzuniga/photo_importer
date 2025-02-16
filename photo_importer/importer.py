@@ -69,6 +69,10 @@ class PhotoImporter:
         """Create directory and return success status."""
         try:
             os.makedirs(path, exist_ok=True)
+            # Verify we can write to the directory
+            if not os.access(path, os.W_OK):
+                print(f"Error: No write permission for directory '{path}'")
+                return False
             return True
         except Exception as e:
             print(f"Error creating directory '{path}': {e}")
@@ -99,6 +103,10 @@ class PhotoImporter:
         """Process a single file and return True if processing should continue."""
         stats.processed += 1
         
+        # Check if we've already hit max errors
+        if stats.errors >= config.max_errors:
+            return False
+
         date_taken = self.get_date_taken(file_path)
         if date_taken is None:
             print(f"[{stats.processed}] Skipping '{file_path}': No valid date metadata found.")
@@ -125,7 +133,7 @@ class PhotoImporter:
             elif not config.overwrite:
                 dest_path = self.get_unique_destination_path(dest_path)
 
-        action_msg = "Overwriting" if config.overwrite and os.path.exists(dest_path) else "Copied"
+        action_msg = "Overwriting" if config.overwrite and os.path.exists(dest_path) else "Copying"
         
         if self.copy_file(file_path, dest_path):
             stats.imported += 1

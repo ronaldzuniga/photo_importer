@@ -144,34 +144,56 @@ The Photo Importer is particularly useful for photographers who need to regularl
 
 ### Running Tests
 
-The project includes a comprehensive test suite. To run the tests:
+The project includes a comprehensive test suite that covers:
+- Core photo importing functionality
+- RAF file handling with exiftool
+- Error conditions and edge cases
+- Command-line argument validation
+- File permission handling
+- Duplicate file handling
 
+To run the tests:
 ```bash
-python -m pytest test_photo_importer.py -v
+python -m pytest tests/test_importer.py -v
 ```
 
 To run tests with coverage report:
 ```bash
-python -m pytest test_photo_importer.py -v --cov=photo_importer --cov-report=term-missing
+python -m pytest --cov=photo_importer tests/ --cov-report=term-missing
 ```
+
+Current test coverage:
+- Overall: 60%
+- Core importer module: 71%
+- Full CLI testing coming soon
 
 ### Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run the test suite
-5. Submit a pull request
+4. Run the test suite and ensure all tests pass
+5. Ensure your changes maintain or improve the current test coverage
+6. Submit a pull request
 
 ## Error Handling
 
-The tool includes robust error handling:
+The tool includes robust error handling for:
 
 - Invalid source/destination directories
-- Missing EXIF data
+- Missing or corrupt EXIF data
 - File access permissions
 - Duplicate files
-- Maximum error threshold
+- RAF file processing errors
+- Maximum error threshold (configurable)
+- Directory creation failures
+- Invalid file formats
+
+The tool will:
+1. Log all errors with descriptive messages
+2. Continue processing after non-critical errors
+3. Stop when max_errors threshold is reached
+4. Maintain a count of processed, skipped, and failed files
 
 ## License
 
@@ -179,7 +201,7 @@ The tool includes robust error handling:
 
 ## Author
 
-[Your Name]
+Ronald Zúñiga
 
 ## Acknowledgments
 
