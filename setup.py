@@ -9,12 +9,12 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="photo-importer",
     version="0.1.0",
-    author="Photo Importer Contributors",
-    author_email="your.email@example.com",
+    author="Ronald Zúñiga",
+    author_email="ronald@ronaldzuniga.com",
     description="A tool for organizing photos by date taken using EXIF metadata",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/photo-importer",
+    url="https://github.com/ronaldzuniga/photo-importer",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

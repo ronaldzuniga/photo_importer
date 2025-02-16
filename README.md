@@ -24,7 +24,7 @@ A robust Python utility for organizing photos by their date taken, leveraging EX
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ronaldzuniga/photo_importer.git
    cd photo_importer
    ```
 
@@ -34,9 +34,10 @@ A robust Python utility for organizing photos by their date taken, leveraging EX
    source venv/bin/activate  # On Windows, use: venv\Scripts\activate
    ```
 
-3. Install dependencies:
+3. Install dependencies and the package:
    ```bash
    pip install -r requirements.txt
+   pip install -e .
    ```
 
 4. For RAF file support, install exiftool:
@@ -46,9 +47,18 @@ A robust Python utility for organizing photos by their date taken, leveraging EX
 
 ## Usage
 
-The basic syntax is:
+After installation, you can run the application in two ways:
+
+### 1. Using the installed command
+
 ```bash
-python photo_importer.py --from SOURCE_DIR --to DESTINATION_DIR [options]
+photo-importer --from SOURCE_DIR --to DESTINATION_DIR [options]
+```
+
+### 2. Using Python module directly
+
+```bash
+python -m photo_importer.cli --from SOURCE_DIR --to DESTINATION_DIR [options]
 ```
 
 ### Options
@@ -63,42 +73,27 @@ python photo_importer.py --from SOURCE_DIR --to DESTINATION_DIR [options]
 
 1. Import from SD card (macOS):
    ```bash
-   python photo_importer.py --from /Volumes/SD_CARD/DCIM --to ~/Pictures/Photo_Library
+   photo-importer --from /Volumes/SD_CARD/DCIM --to ~/Pictures/Photo_Library
    ```
 
 2. Import from SD card (Windows):
    ```bash
-   python photo_importer.py --from E:/DCIM --to C:/Users/YourName/Pictures/Photo_Library
+   photo-importer --from E:/DCIM --to C:/Users/YourName/Pictures/Photo_Library
    ```
 
-3. Import from SD card (Linux):
+3. Skip existing files:
    ```bash
-   python photo_importer.py --from /media/username/SD_CARD/DCIM --to ~/Pictures/Photo_Library
+   photo-importer --from ~/Pictures/Camera --to ~/Pictures/Organized --skip-existing
    ```
 
-4. Skip existing files when importing from camera:
+4. Using Python module directly with custom error limit:
    ```bash
-   python photo_importer.py --from /Volumes/NIKON_D750/DCIM --to ~/Pictures/Photo_Library --skip-existing
+   python -m photo_importer.cli --from ~/Pictures/Camera --to ~/Pictures/Organized --max-errors 5
    ```
 
-5. Basic usage with local directories:
+5. Overwrite existing files:
    ```bash
-   python photo_importer.py --from ~/Pictures/Camera --to ~/Pictures/Organized
-   ```
-
-6. Skip existing files:
-   ```bash
-   python photo_importer.py --from ~/Pictures/Camera --to ~/Pictures/Organized --skip-existing
-   ```
-
-7. Overwrite existing files:
-   ```bash
-   python photo_importer.py --from ~/Pictures/Camera --to ~/Pictures/Organized --overwrite
-   ```
-
-8. Custom error limit:
-   ```bash
-   python photo_importer.py --from ~/Pictures/Camera --to ~/Pictures/Organized --max-errors 5
+   photo-importer --from ~/Pictures/Camera --to ~/Pictures/Organized --overwrite
    ```
 
 ## Directory Structure
