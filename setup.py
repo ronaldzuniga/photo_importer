@@ -6,9 +6,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
+# Define version in a way that doesn't require importing the package
+__version__ = "0.1.0"
+
 setup(
     name="photo-importer",
-    version="0.1.0",
+    version=__version__,
     author="Ronald Zúñiga",
     author_email="ronald@ronaldzuniga.com",
     description="A tool for organizing photos by date taken using EXIF metadata",
@@ -24,6 +27,10 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Multimedia :: Graphics",
         "Topic :: System :: Filesystems",
     ],
