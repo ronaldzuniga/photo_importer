@@ -227,43 +227,49 @@ class TestPhotoImporter(unittest.TestCase):
             pass
 
         args = MockArgs()
-        args.source = self.source_dir
-        args.destination = self.target_dir
+        args.source_dir = self.source_dir
+        args.target_dir = self.target_dir
         args.skip_existing = False
         args.overwrite = False
         args.max_errors = 10
 
         valid, config = self.importer.validate_arguments(args)
+
         self.assertTrue(valid)
         self.assertIsNotNone(config)
-        self.assertEqual(config.source_dir, os.path.abspath(self.source_dir))
-        self.assertEqual(config.target_dir, os.path.abspath(self.target_dir))
+        self.assertEqual(config.source_dir, self.source_dir)
+        self.assertEqual(config.target_dir, self.target_dir)
+        self.assertEqual(config.skip_existing, False)
+        self.assertEqual(config.overwrite, False)
+        self.assertEqual(config.max_errors, 10)
 
     def test_validate_arguments_invalid_source(self):
         class MockArgs:
             def __init__(self):
-                self.source = "/nonexistent/path"
-                self.destination = "/valid/path"
+                self.source_dir = "/nonexistent/path"
+                self.target_dir = "/valid/path"
                 self.skip_existing = False
                 self.overwrite = False
                 self.max_errors = 10
 
         args = MockArgs()
         valid, config = self.importer.validate_arguments(args)
+
         self.assertFalse(valid)
         self.assertIsNone(config)
 
     def test_validate_arguments_mutually_exclusive_flags(self):
         class MockArgs:
             def __init__(self):
-                self.source = "/valid/path"
-                self.destination = "/valid/path"
+                self.source_dir = "/valid/path"
+                self.target_dir = "/valid/path"
                 self.skip_existing = True
                 self.overwrite = True
                 self.max_errors = 10
 
         args = MockArgs()
         valid, config = self.importer.validate_arguments(args)
+
         self.assertFalse(valid)
         self.assertIsNone(config)
 

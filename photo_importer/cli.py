@@ -4,8 +4,15 @@ import argparse
 import sys
 from .importer import PhotoImporter
 
-def main():
-    """Entry point for the photo-importer command."""
+def parse_args(args=None):
+    """Parse command line arguments.
+    
+    Args:
+        args: List of arguments to parse. Defaults to sys.argv[1:].
+        
+    Returns:
+        argparse.Namespace: Parsed command line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="Import and organize photos by their date taken."
     )
@@ -38,30 +45,38 @@ def main():
         help="Maximum number of errors before aborting (default: 10)"
     )
 
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+def main():
+    """Entry point for the photo-importer command.
+    
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
+    args = parse_args()
 
     if args.skip_existing and args.overwrite:
         print("Error: Cannot use both --skip-existing and --overwrite")
-        sys.exit(1)
+        return 1
 
-    importer = PhotoImporter(
-        source_dir=args.source_dir,
-        target_dir=args.target_dir,
-        skip_existing=args.skip_existing,
-        overwrite=args.overwrite,
-        max_errors=args.max_errors
-    )
+    importer = PhotoImporter()
+    valid, config = importer.validate_arguments(args)
     
+    if not valid:
+        return 1
+        
     try:
         stats = importer.run()
-        print(f"\nImport completed successfully!")
-        print(f"Files processed: {stats.processed}")
-        print(f"Files imported: {stats.imported}")
-        print(f"Files skipped: {stats.skipped}")
-        print(f"Errors encountered: {stats.errors}")
+        print(f"\nImport completed:")
+        print(f"  Processed: {stats.processed}")
+        print(f"  Imported: {stats.imported}")
+        print(f"  Skipped: {stats.skipped}")
+        print(f"  Errors: {stats.errors}")
+        
+        return 0 if stats.errors < config.max_errors else 1
     except Exception as e:
         print(f"Error: {str(e)}")
-        sys.exit(1)
+        return 1
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

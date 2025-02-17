@@ -159,22 +159,63 @@ class PhotoImporter:
             print("Error: Cannot use both --skip-existing and --overwrite flags")
             return False, None
 
-        source_dir = os.path.abspath(args.source)
+        source_dir = os.path.abspath(args.source_dir)
+        target_dir = os.path.abspath(args.target_dir)
+
         if not os.path.exists(source_dir):
-            print(f"Error: Source folder '{source_dir}' does not exist.")
+            print(f"Error: Source directory '{source_dir}' does not exist")
             return False, None
 
-        target_dir = os.path.abspath(args.destination)
-        if not os.path.exists(target_dir) and not self.create_destination_directory(target_dir):
+        if not os.path.isdir(source_dir):
+            print(f"Error: Source path '{source_dir}' is not a directory")
             return False, None
 
-        return True, ImportConfig(
+        if not os.access(source_dir, os.R_OK):
+            print(f"Error: No read permission for source directory '{source_dir}'")
+            return False, None
+
+        config = ImportConfig(
             source_dir=source_dir,
             target_dir=target_dir,
             skip_existing=args.skip_existing,
             overwrite=args.overwrite,
             max_errors=args.max_errors
         )
+        self.config = config
+        return True, config
+
+    def _get_image_files(self) -> list[str]:
+        """Get a list of image files in the source directory."""
+        image_files = []
+        for root, _, files in os.walk(self.config.source_dir):
+            for file in files:
+                if os.path.splitext(file)[1].lower() in self.config.allowed_extensions:
+                    image_files.append(os.path.join(root, file))
+        return image_files
+
+    def run(self) -> ImportStats:
+        """Run the import process.
+        
+        Returns:
+            ImportStats: Statistics about the import process
+        
+        Raises:
+            ValueError: If run is called before validate_arguments
+        """
+        if not hasattr(self, 'config'):
+            raise ValueError("Must call validate_arguments before run")
+            
+        stats = ImportStats()
+        
+        try:
+            for file_path in self._get_image_files():
+                if not self.process_file(file_path, self.config, stats):
+                    break
+                    
+            return stats
+        except Exception as e:
+            print(f"Error during import: {str(e)}")
+            raise
 
     def print_summary(self, stats: ImportStats) -> None:
         """Print import process summary."""
@@ -187,8 +228,8 @@ class PhotoImporter:
     def main(self):
         """Main entry point for the photo importer."""
         parser = argparse.ArgumentParser(description="Import pictures and organize them by date taken.")
-        parser.add_argument('--from', dest='source', required=True, help='Path to the source folder')
-        parser.add_argument('--to', dest='destination', required=True, help='Path to the destination folder')
+        parser.add_argument('--from', dest='source_dir', required=True, help='Path to the source folder')
+        parser.add_argument('--to', dest='target_dir', required=True, help='Path to the destination folder')
         parser.add_argument('--skip-existing', action='store_true', help='Skip files that already exist in destination')
         parser.add_argument('--overwrite', action='store_true', help='Overwrite existing files instead of creating unique names')
         parser.add_argument('--max-errors', type=int, default=10, help='Maximum number of errors before aborting (default: 10)')
@@ -198,19 +239,7 @@ class PhotoImporter:
         if not valid:
             return
 
-        stats = ImportStats()
-        
-        for root, _, files in os.walk(config.source_dir):
-            for file in files:
-                if os.path.splitext(file)[1].lower() not in config.allowed_extensions:
-                    continue
-                    
-                file_path = os.path.join(root, file)
-                if not self.process_file(file_path, config, stats):
-                    print(f"\nAborting: Too many errors ({stats.errors})")
-                    self.print_summary(stats)
-                    return
-
+        stats = self.run()
         self.print_summary(stats)
 
 if __name__ == "__main__":
